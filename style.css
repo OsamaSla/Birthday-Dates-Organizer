@@ -1,0 +1,691 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --month-1: #e74c3c;
+  --month-2: #e91e63;
+  --month-3: #9c27b0;
+  --month-4: #673ab7;
+  --month-5: #3f51b5;
+  --month-6: #2196f3;
+  --month-7: #00bcd4;
+  --month-8: #009688;
+  --month-9: #4caf50;
+  --month-10: #ff9800;
+  --month-11: #795548;
+  --month-12: #f44336;
+}
+
+body {
+  font-family: 'Tajawal', sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  direction: rtl;
+}
+
+.confetti-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+  overflow: hidden;
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: -10px;
+  animation: confetti-fall 3s ease-in-out infinite;
+}
+
+@keyframes confetti-fall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+header {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 2rem;
+  text-align: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.header-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.cake-icon {
+  font-size: 3rem;
+  margin-bottom: 0.5rem;
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+h1 {
+  color: white;
+  font-size: 2.5rem;
+  font-weight: 800;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.subtitle {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1.1rem;
+  margin-top: 0.5rem;
+}
+
+main {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.form-container {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.form-container h2 {
+  color: #333;
+  margin-bottom: 1.5rem;
+  font-size: 1.4rem;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 1.2rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.form-group input, .form-group select {
+  width: 100%;
+  padding: 0.9rem 1.2rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: 'Tajawal', sans-serif;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  direction: rtl;
+  background: white;
+}
+
+.form-group input:focus, .form-group select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.date-selectors {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.date-selectors input[type="number"] {
+  flex: 1;
+  width: 100%;
+  padding: 0.9rem 1.2rem;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: 'Tajawal', sans-serif;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  direction: ltr;
+  text-align: center;
+  -moz-appearance: textfield;
+}
+
+.date-selectors input[type="number"]::-webkit-inner-spin-button,
+.date-selectors input[type="number"]::-webkit-outer-spin-button {
+  opacity: 1;
+  height: 35px;
+}
+
+.date-selectors input[type="number"]:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.date-separator {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.month-name {
+  font-size: 0.9rem;
+  color: #667eea;
+  font-weight: 600;
+  min-width: 60px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.btn {
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: 'Tajawal', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  flex: 1;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-secondary {
+  background: #e0e0e0;
+  color: #333;
+}
+
+.btn-secondary:hover {
+  background: #d0d0d0;
+}
+
+.controls {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  flex: 1;
+  min-width: 180px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 0.8rem 1.2rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: 'Tajawal', sans-serif;
+  background: rgba(255, 255, 255, 0.9);
+  direction: rtl;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: white;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+}
+
+.filter-box {
+  min-width: 160px;
+}
+
+.filter-box select {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: 'Tajawal', sans-serif;
+  background: rgba(255, 255, 255, 0.9);
+  direction: rtl;
+  cursor: pointer;
+}
+
+.filter-box select:focus {
+  outline: none;
+  border-color: white;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-pdf, .btn-delete-all {
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  white-space: nowrap;
+}
+
+.btn-pdf:hover, .btn-delete-all:hover {
+  background: white;
+  transform: translateY(-2px);
+}
+
+.btn-sm {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  white-space: nowrap;
+}
+
+.btn-sm:hover {
+  background: white;
+  transform: translateY(-1px);
+}
+
+.btn-delete-all {
+  background: rgba(255, 100, 100, 0.9);
+  color: white;
+}
+
+.btn-delete-all:hover {
+  background: rgba(255, 80, 80, 1);
+}
+
+.stats {
+  color: white;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+.birthday-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.month-group {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+}
+
+.month-header {
+  padding: 0.5rem 1rem;
+  color: white;
+  font-size: 1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.month-header .emoji {
+  font-size: 1rem;
+}
+
+.birthday-card {
+  background: white;
+  padding: 0.5rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  transition: background 0.2s;
+}
+
+.birthday-card:hover {
+  background: #f8f9ff;
+}
+
+.birthday-card.today {
+  background: linear-gradient(135deg, #fff9c4, #fff176);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.01); }
+}
+
+.birthday-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  min-width: 0;
+  gap: 1rem;
+}
+
+.birthday-name {
+  color: #333;
+  font-size: 0.95rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+}
+
+.birthday-date {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #666;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  direction: ltr;
+}
+
+.birthday-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-edit, .btn-delete {
+  padding: 0.5rem 0.8rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.btn-edit {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.btn-edit:hover {
+  background: #bbdefb;
+}
+
+.btn-delete {
+  background: #ffebee;
+  color: #d32f2f;
+}
+
+.btn-delete:hover {
+  background: #ffcdd2;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: white;
+  display: none;
+}
+
+.empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.empty-state p {
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.empty-sub {
+  opacity: 0.8;
+  font-size: 1rem !important;
+}
+
+footer {
+  text-align: center;
+  padding: 2rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+}
+
+/* Month colors */
+.month-1 { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+.month-2 { background: linear-gradient(135deg, #e91e63, #c2185b); }
+.month-3 { background: linear-gradient(135deg, #9c27b0, #7b1fa2); }
+.month-4 { background: linear-gradient(135deg, #673ab7, #512da8); }
+.month-5 { background: linear-gradient(135deg, #3f51b5, #303f9f); }
+.month-6 { background: linear-gradient(135deg, #2196f3, #1976d2); }
+.month-7 { background: linear-gradient(135deg, #00bcd4, #0097a7); }
+.month-8 { background: linear-gradient(135deg, #009688, #00796b); }
+.month-9 { background: linear-gradient(135deg, #4caf50, #388e3c); }
+.month-10 { background: linear-gradient(135deg, #ff9800, #f57c00); }
+.month-11 { background: linear-gradient(135deg, #795548, #5d4037); }
+.month-12 { background: linear-gradient(135deg, #f44336, #d32f2f); }
+
+/* Print styles - only when NOT in pdf-mode */
+body:not(.pdf-mode) header,
+body:not(.pdf-mode) .form-container,
+body:not(.pdf-mode) .controls,
+body:not(.pdf-mode) .stats,
+body:not(.pdf-mode) footer,
+body:not(.pdf-mode) .confetti-container,
+body:not(.pdf-mode) .birthday-actions {
+  /* visible in normal mode */
+}
+
+@media print {
+  body:not(.pdf-mode) {
+    background: white !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  body:not(.pdf-mode) header,
+  body:not(.pdf-mode) .form-container,
+  body:not(.pdf-mode) .controls,
+  body:not(.pdf-mode) .stats,
+  body:not(.pdf-mode) footer,
+  body:not(.pdf-mode) .confetti-container,
+  body:not(.pdf-mode) .birthday-actions {
+    display: none !important;
+  }
+
+  body:not(.pdf-mode) main {
+    margin: 0;
+    padding: 3mm;
+    max-width: 100%;
+  }
+
+  body:not(.pdf-mode) .birthday-list {
+    gap: 1mm;
+  }
+
+  body:not(.pdf-mode) .month-group {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    box-shadow: none;
+    border: 0.5px solid #ccc;
+    margin-bottom: 1mm;
+  }
+
+  body:not(.pdf-mode) .month-header {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    padding: 1.5mm 3mm;
+    font-size: 8pt;
+  }
+
+  body:not(.pdf-mode) .month-header .emoji {
+    font-size: 8pt;
+  }
+
+  body:not(.pdf-mode) .birthday-card {
+    padding: 1mm 3mm;
+    border-bottom: 0.3px solid #eee;
+  }
+
+  body:not(.pdf-mode) .birthday-name {
+    font-size: 7.5pt;
+  }
+
+  body:not(.pdf-mode) .birthday-date {
+    font-size: 7pt;
+  }
+}
+
+/* PDF Title - hidden by default */
+.pdf-title {
+  display: none;
+}
+
+.pdf-date {
+  display: none;
+}
+
+/* Hide browser header/footer in PDF */
+@media print {
+  @page {
+    margin: 8mm 12mm 5mm;
+    size: A4;
+  }
+
+  @page :first {
+    margin-top: 8mm;
+  }
+
+  @page :last {
+    margin-bottom: 5mm;
+  }
+}
+
+/* PDF specific */
+.pdf-mode .pdf-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  padding: 20px 20px 5px;
+  text-align: center;
+}
+
+.pdf-mode .pdf-title h1 {
+  color: #d63384;
+  font-size: 2.2rem;
+  font-weight: 800;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.pdf-mode .pdf-icon {
+  font-size: 2.5rem;
+}
+
+.pdf-mode .pdf-date {
+  display: block;
+  text-align: center;
+  color: #888;
+  font-size: 0.85rem;
+  padding-bottom: 10px;
+}
+
+.pdf-mode body {
+  background: #ffeef5 !important;
+  background-image:
+    radial-gradient(circle at 5% 10%, #ff69b4 1px, transparent 1px),
+    radial-gradient(circle at 15% 25%, #ffd700 1px, transparent 1px),
+    radial-gradient(circle at 25% 8%, #ff69b4 1px, transparent 1px),
+    radial-gradient(circle at 35% 20%, #87ceeb 1px, transparent 1px),
+    radial-gradient(circle at 45% 5%, #ffd700 1px, transparent 1px),
+    radial-gradient(circle at 55% 18%, #ff69b4 1px, transparent 1px),
+    radial-gradient(circle at 65% 12%, #98fb98 1px, transparent 1px),
+    radial-gradient(circle at 75% 22%, #ffd700 1px, transparent 1px),
+    radial-gradient(circle at 85% 8%, #ff69b4 1px, transparent 1px),
+    radial-gradient(circle at 95% 15%, #87ceeb 1px, transparent 1px),
+    radial-gradient(circle at 8% 45%, #ffd700 2px, transparent 2px),
+    radial-gradient(circle at 92% 55%, #ff69b4 2px, transparent 2px),
+    radial-gradient(circle at 5% 85%, #98fb98 2px, transparent 2px),
+    radial-gradient(circle at 95% 80%, #ffd700 2px, transparent 2px),
+    radial-gradient(circle at 10% 65%, #ff69b4 1.5px, transparent 1.5px),
+    radial-gradient(circle at 90% 35%, #87ceeb 1.5px, transparent 1.5px);
+  background-size: 100% 100%;
+  position: relative;
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+}
+
+.pdf-mode header, .pdf-mode .form-container, .pdf-mode .controls,
+.pdf-mode .stats, .pdf-mode footer, .pdf-mode .confetti-container,
+.pdf-mode .birthday-actions, .pdf-mode .birthday-avatar {
+  display: none !important;
+}
+
+.pdf-mode main {
+  margin: 0 auto;
+  padding: 10px 30px;
+  max-width: 800px;
+  position: relative;
+}
+
+.pdf-mode .birthday-list {
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 15px;
+  padding: 15px;
+  box-shadow: 0 6px 30px rgba(214, 51, 132, 0.15);
+  border: 2px solid rgba(255, 105, 180, 0.2);
+}
+
+.pdf-mode .month-group {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  margin-bottom: 8px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.pdf-mode .month-header {
+  -webkit-print-color-adjust: exact !important;
+  print-color-adjust: exact !important;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+}
+
+.pdf-mode .birthday-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 6px;
+  margin: 2px 6px;
+  padding: 4px 10px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.pdf-mode .birthday-name {
+  font-size: 0.85rem;
+}
+
+.pdf-mode .birthday-date {
+  font-size: 0.75rem;
+}
+
+.pdf-mode .days-count,
+.pdf-mode .days-sep {
+  display: none;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  h1 { font-size: 1.8rem; }
+  .controls { flex-direction: column; }
+  .action-buttons { flex-wrap: wrap; }
+  .birthday-card { flex-direction: column; gap: 0.8rem; align-items: flex-start; }
+  .birthday-actions { width: 100%; justify-content: flex-end; }
+  .birthday-details h3, .birthday-details p { font-size: 0.85rem; }
+}
