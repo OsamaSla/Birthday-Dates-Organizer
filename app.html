@@ -81,6 +81,7 @@
     .empty-state p { font-size: 1.3rem; margin-bottom: 0.5rem; }
     .empty-sub { opacity: 0.8; font-size: 1rem !important; }
     footer { text-align: center; padding: 2rem; color: rgba(255,255,255,0.7); font-size: 0.9rem; }
+    .big-heart { font-size: 1.5em; vertical-align: middle; }
     .month-1{background:linear-gradient(135deg,#e74c3c,#c0392b)} .month-2{background:linear-gradient(135deg,#e91e63,#c2185b)} .month-3{background:linear-gradient(135deg,#9c27b0,#7b1fa2)} .month-4{background:linear-gradient(135deg,#673ab7,#512da8)} .month-5{background:linear-gradient(135deg,#3f51b5,#303f9f)} .month-6{background:linear-gradient(135deg,#2196f3,#1976d2)} .month-7{background:linear-gradient(135deg,#00bcd4,#0097a7)} .month-8{background:linear-gradient(135deg,#009688,#00796b)} .month-9{background:linear-gradient(135deg,#4caf50,#388e3c)} .month-10{background:linear-gradient(135deg,#ff9800,#f57c00)} .month-11{background:linear-gradient(135deg,#795548,#5d4037)} .month-12{background:linear-gradient(135deg,#f44336,#d32f2f)}
     @media print { @page { margin: 8mm 12mm 5mm; size: A4; } @page :first { margin-top: 8mm; } @page :last { margin-bottom: 5mm; } }
     @media print { body:not(.pdf-mode){background:white!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important} body:not(.pdf-mode) header,body:not(.pdf-mode) .form-container,body:not(.pdf-mode) .controls,body:not(.pdf-mode) .stats,body:not(.pdf-mode) footer,body:not(.pdf-mode) .confetti-container,body:not(.pdf-mode) .birthday-actions{display:none!important} body:not(.pdf-mode) main{margin:0;padding:3mm;max-width:100%} body:not(.pdf-mode) .birthday-list{gap:1mm} body:not(.pdf-mode) .month-group{break-inside:avoid;page-break-inside:avoid;box-shadow:none;border:.5px solid #ccc;margin-bottom:1mm} body:not(.pdf-mode) .month-header{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;padding:1.5mm 3mm;font-size:8pt} body:not(.pdf-mode) .month-header .emoji{font-size:8pt} body:not(.pdf-mode) .birthday-card{padding:1mm 3mm;border-bottom:.3px solid #eee} body:not(.pdf-mode) .birthday-name{font-size:7.5pt} body:not(.pdf-mode) .birthday-date{font-size:7pt} }
@@ -198,7 +199,7 @@
     </div>
   </main>
   <footer>
-    <p>made with ❤️</p>
+    <p><span dir="ltr">made with <span class="big-heart">❤️</span></span></p>
   </footer>
   <script>
     const STORAGE_KEY = 'birthdays';
