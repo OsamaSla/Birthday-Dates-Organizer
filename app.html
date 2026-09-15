@@ -101,6 +101,22 @@
     .pdf-mode .birthday-date{font-size:0.75rem}
     .pdf-mode .days-count,.pdf-mode .days-sep{display:none}
     @media (max-width:600px) { h1{font-size:1.8rem} .controls{flex-direction:column} .action-buttons{flex-wrap:wrap} .birthday-card{flex-direction:column;gap:0.8rem;align-items:flex-start} .birthday-actions{width:100%;justify-content:flex-end} .birthday-details h3,.birthday-details p{font-size:0.85rem} }
+    .btn-calendar { background: rgba(255,255,255,0.9); color: #333; white-space: nowrap; }
+    .btn-calendar:hover { background: white; transform: translateY(-1px); }
+    .btn-calendar.active { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 1rem; }
+    .cal-month { border-radius: 12px; overflow: hidden; box-shadow: 0 3px 12px rgba(0,0,0,0.12); background: white; }
+    .cal-month-header { padding: 6px 10px; color: white; font-size: 0.8rem; font-weight: 700; display: flex; align-items: center; justify-content: space-between; }
+    .cal-month-header .count { font-size: 0.7rem; opacity: 0.8; }
+    .cal-month-body { padding: 4px 6px; min-height: 60px; max-height: 140px; overflow-y: auto; }
+    .cal-bday { display: flex; justify-content: space-between; align-items: center; padding: 2px 4px; font-size: 0.65rem; border-bottom: 1px solid #f0f0f0; }
+    .cal-bday:last-child { border-bottom: none; }
+    .cal-bday-name { font-weight: 600; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60%; }
+    .cal-bday-date { color: #888; font-size: 0.6rem; direction: ltr; }
+    .cal-bday.today { background: #fff9c4; border-radius: 4px; }
+    .cal-empty { color: #ccc; font-size: 0.65rem; text-align: center; padding: 10px 0; }
+    @media print { .calendar-grid { display: grid !important; grid-template-columns: repeat(3, 1fr); gap: 3mm; page-break-inside: avoid; } .cal-month { box-shadow: none; border: 0.5px solid #ccc; border-radius: 6px; break-inside: avoid; page-break-inside: avoid; } .cal-month-header { padding: 2mm 3mm; font-size: 7pt; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; } .cal-month-body { padding: 1mm 2mm; max-height: none; } .cal-bday { font-size: 6pt; padding: 0.5mm 1mm; } .cal-bday-date { font-size: 5.5pt; } .calendar-grid .birthday-list, .calendar-grid .birthday-actions { display: none !important; } }
+    @media (max-width:600px) { .calendar-grid { grid-template-columns: repeat(2, 1fr); } }
   </style>
 </head>
 <body>
@@ -164,6 +180,7 @@
         </select>
       </div>
       <div class="action-buttons">
+        <button class="btn btn-sm btn-calendar" id="calendarToggle" onclick="toggleCalendarView()">📅 عرض تقويم</button>
         <button class="btn btn-pdf" onclick="saveAsPDF()">📄 حفظ PDF</button>
         <button class="btn btn-sm btn-export" onclick="exportData()">💾 تصدير</button>
         <button class="btn btn-sm btn-import" onclick="document.getElementById('importFile').click()">📂 استيراد</button>
@@ -173,6 +190,7 @@
     </div>
     <div class="stats" id="stats"></div>
     <div id="birthdayList" class="birthday-list"></div>
+    <div id="calendarGrid" class="calendar-grid" style="display:none;"></div>
     <div id="emptyState" class="empty-state">
       <div class="empty-icon">🎁</div>
       <p>لا توجد أعياد ميلاد بعد</p>
@@ -232,8 +250,8 @@
     const emptyState = document.getElementById('emptyState');
     const statsContainer = document.getElementById('stats');
     form.addEventListener('submit', handleSubmit);
-    searchInput.addEventListener('input', renderList);
-    monthFilter.addEventListener('change', renderList);
+    searchInput.addEventListener('input', () => { if (calendarViewActive) renderCalendar(); else renderList(); });
+    monthFilter.addEventListener('change', () => { if (calendarViewActive) renderCalendar(); else renderList(); });
     monthSelect.addEventListener('input', updateMonthName);
     function updateMonthName() { const val = parseInt(monthSelect.value); monthNameDisplay.textContent = (val >= 1 && val <= 12) ? monthNames[val - 1] : ''; }
     function generateId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
@@ -241,18 +259,23 @@
     function formatDate(dateStr) { const { day, month } = parseDate(dateStr); return `${String(day).padStart(2,'0')}/${String(month).padStart(2,'0')}`; }
     function isToday(dateStr) { const today = new Date(); const { day, month } = parseDate(dateStr); return today.getMonth() === month - 1 && today.getDate() === day; }
     function getNextBirthday(dateStr) { const today = new Date(); const { day, month } = parseDate(dateStr); const thisYear = new Date(today.getFullYear(), month - 1, day); if (thisYear < today) thisYear.setFullYear(today.getFullYear() + 1); return Math.ceil((thisYear - today) / (1000 * 60 * 60 * 24)); }
-    function handleSubmit(e) { e.preventDefault(); const name = nameInput.value.trim(); const day = daySelect.value; const month = monthSelect.value; if (!name || !day || !month) return; const date = `${String(day).padStart(2,'0')}/${String(month).padStart(2,'0')}`; const editId = editIdInput.value; if (editId) { const idx = birthdays.findIndex(b => b.id === editId); if (idx !== -1) birthdays[idx] = { ...birthdays[idx], name, date }; cancelEdit(); } else { birthdays.push({ id: generateId(), name, date }); } save(); renderList(); form.reset(); }
+    function handleSubmit(e) { e.preventDefault(); const name = nameInput.value.trim(); const day = daySelect.value; const month = monthSelect.value; if (!name || !day || !month) return; const date = `${String(day).padStart(2,'0')}/${String(month).padStart(2,'0')}`; const editId = editIdInput.value; if (editId) { const idx = birthdays.findIndex(b => b.id === editId); if (idx !== -1) birthdays[idx] = { ...birthdays[idx], name, date }; cancelEdit(); } else { birthdays.push({ id: generateId(), name, date }); } save(); if (calendarViewActive) renderCalendar(); else renderList(); form.reset(); }
     function cancelEdit() { editIdInput.value = ''; submitBtn.textContent = 'إضافة'; formTitle.textContent = 'إضافة عيد ميلاد جديد'; cancelBtn.style.display = 'none'; form.reset(); monthNameDisplay.textContent = ''; }
     function editBirthday(id) { const b = birthdays.find(x => x.id === id); if (!b) return; nameInput.value = b.name; const { day, month } = parseDate(b.date); daySelect.value = day; monthSelect.value = month; updateMonthName(); editIdInput.value = b.id; submitBtn.textContent = 'تحديث'; formTitle.textContent = 'تعديل عيد الميلاد'; cancelBtn.style.display = 'inline-block'; nameInput.focus(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-    function deleteBirthday(id) { if (!confirm('هل أنت متأكد من الحذف؟')) return; birthdays = birthdays.filter(b => b.id !== id); save(); renderList(); }
-    function deleteAll() { if (!confirm('هل أنت متأكد من حذف جميع أعياد الميلاد؟')) return; birthdays = []; save(); renderList(); }
-    function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(birthdays)); }
+    function deleteBirthday(id) { if (!confirm('هل أنت متأكد من الحذف؟')) return; birthdays = birthdays.filter(b => b.id !== id); save(); if (calendarViewActive) renderCalendar(); else renderList(); }
+    function deleteAll() { if (!confirm('هل أنت متأكد من حذف جميع أعياد الميلاد؟')) return; birthdays = []; save(); if (calendarViewActive) renderCalendar(); else renderList(); }
+    function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(birthdays)); if (calendarViewActive) renderCalendar(); }
     function exportData() { const dataStr = JSON.stringify(birthdays, null, 2); const blob = new Blob([dataStr], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'birthdays.json'; a.click(); URL.revokeObjectURL(url); }
-    function importData(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const data = JSON.parse(e.target.result); if (Array.isArray(data)) { birthdays = data; save(); renderList(); alert('تم الاستيراد بنجاح!'); } else { alert('الملف غير صالح'); } } catch { alert('خطأ في قراءة الملف'); } }; reader.readAsText(file); event.target.value = ''; }
+    function importData(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const data = JSON.parse(e.target.result); if (Array.isArray(data)) { birthdays = data; save(); if (calendarViewActive) renderCalendar(); else renderList(); alert('تم الاستيراد بنجاح!'); } else { alert('الملف غير صالح'); } } catch { alert('خطأ في قراءة الملف'); } }; reader.readAsText(file); event.target.value = ''; }
     function getFilteredBirthdays() { const query = searchInput.value.trim().toLowerCase(); const filterMonth = parseInt(monthFilter.value); return birthdays.filter(b => { const matchesName = b.name.toLowerCase().includes(query); const { month } = parseDate(b.date); return matchesName && (filterMonth === 0 || month === filterMonth); }); }
     function renderList() { let filtered = getFilteredBirthdays(); filtered.sort((a, b) => { const pa = parseDate(a.date); const pb = parseDate(b.date); return (pa.month - pb.month) || (pa.day - pb.day); }); listContainer.innerHTML = ''; if (filtered.length === 0) { emptyState.style.display = 'block'; statsContainer.textContent = ''; return; } emptyState.style.display = 'none'; const todayCount = filtered.filter(b => isToday(b.date)).length; statsContainer.textContent = `إجمالي الأعياد: ${filtered.length}${todayCount > 0 ? ` | أعياد اليوم: ${todayCount}` : ''}`; const groups = {}; filtered.forEach(b => { const { month } = parseDate(b.date); if (!groups[month]) groups[month] = []; groups[month].push(b); }); Object.keys(groups).sort((a, b) => a - b).forEach(month => { const m = parseInt(month); const group = document.createElement('div'); group.className = 'month-group'; const header = document.createElement('div'); header.className = `month-header month-${m}`; header.innerHTML = `<span class="emoji">${monthEmojis[m - 1]}</span> ${monthNames[m - 1]} (${groups[m].length})`; group.appendChild(header); groups[m].forEach(b => { const today = isToday(b.date); const card = document.createElement('div'); card.className = `birthday-card${today ? ' today' : ''}`; const nextDays = getNextBirthday(b.date); card.innerHTML = `<div class="birthday-info"><span class="birthday-name">${b.name} ${today ? '🎉' : ''}</span><span class="birthday-date"><span>${formatDate(b.date)}</span>${nextDays === 0 ? '<span>✨</span>' : `<span class="days-sep">–</span><span class="days-count" dir="rtl">${nextDays} يوم</span>`}</span></div><div class="birthday-actions"><button class="btn-edit" onclick="editBirthday('${b.id}')">✏️</button><button class="btn-delete" onclick="deleteBirthday('${b.id}')">🗑️</button></div>`; group.appendChild(card); }); listContainer.appendChild(group); }); }
-    function saveAsPDF() { const now = new Date(); const d = String(now.getDate()).padStart(2,'0'); const m = String(now.getMonth()+1).padStart(2,'0'); const y = now.getFullYear(); const h = String(now.getHours()).padStart(2,'0'); const min = String(now.getMinutes()).padStart(2,'0'); document.getElementById('pdfDate').textContent = `Created: ${d}/${m}/${y} ${h}:${min}`; document.body.classList.add('pdf-mode'); setTimeout(() => { window.print(); setTimeout(() => document.body.classList.remove('pdf-mode'), 500); }, 100); }
+    function saveAsPDF() { const now = new Date(); const d = String(now.getDate()).padStart(2,'0'); const m = String(now.getMonth()+1).padStart(2,'0'); const y = now.getFullYear(); const h = String(now.getHours()).padStart(2,'0'); const min = String(now.getMinutes()).padStart(2,'0'); document.getElementById('pdfDate').textContent = `Created: ${d}/${m}/${y} ${h}:${min}`; const wasCalendar = calendarViewActive; if (!calendarViewActive) { calendarViewActive = true; calendarGrid.style.display = 'grid'; listContainer.style.display = 'none'; renderCalendar(); } document.body.classList.add('pdf-mode'); setTimeout(() => { window.print(); setTimeout(() => { document.body.classList.remove('pdf-mode'); if (!wasCalendar) { calendarViewActive = false; calendarGrid.style.display = 'none'; listContainer.style.display = 'flex'; renderList(); } }, 500); }, 100); }
     function createConfetti() { const container = document.getElementById('confetti'); const colors = ['#e74c3c','#e91e63','#9c27b0','#3f51b5','#2196f3','#4caf50','#ff9800','#f44336']; for (let i = 0; i < 50; i++) { const piece = document.createElement('div'); piece.className = 'confetti-piece'; piece.style.left = Math.random() * 100 + '%'; piece.style.background = colors[Math.floor(Math.random() * colors.length)]; piece.style.animationDelay = Math.random() * 3 + 's'; piece.style.animationDuration = (Math.random() * 2 + 2) + 's'; piece.style.borderRadius = Math.random() > 0.5 ? '50%' : '0'; container.appendChild(piece); } }
+    let calendarViewActive = false;
+    const calendarGrid = document.getElementById('calendarGrid');
+    const calendarToggle = document.getElementById('calendarToggle');
+    function toggleCalendarView() { calendarViewActive = !calendarViewActive; calendarGrid.style.display = calendarViewActive ? 'grid' : 'none'; listContainer.style.display = calendarViewActive ? 'none' : 'flex'; calendarToggle.classList.toggle('active', calendarViewActive); if (calendarViewActive) renderCalendar(); else renderList(); }
+    function renderCalendar() { calendarGrid.innerHTML = ''; const filtered = getFilteredBirthdays(); for (let m = 1; m <= 12; m++) { const monthBirthdays = filtered.filter(b => { const { month } = parseDate(b.date); return month === m; }).sort((a, b) => parseDate(a.date).day - parseDate(b.date).day); const cell = document.createElement('div'); cell.className = 'cal-month'; cell.innerHTML = `<div class="cal-month-header month-${m}"><span>${monthEmojis[m-1]} ${monthNames[m-1]}</span><span class="count">${monthBirthdays.length}</span></div><div class="cal-month-body">${monthBirthdays.length === 0 ? '<div class="cal-empty">—</div>' : monthBirthdays.map(b => { const today = isToday(b.date); const { day } = parseDate(b.date); return `<div class="cal-bday${today ? ' today' : ''}"><span class="cal-bday-name">${b.name}</span><span class="cal-bday-date">${String(day).padStart(2,'0')}/${String(m).padStart(2,'0')}</span></div>`; }).join('')}</div>`; calendarGrid.appendChild(cell); } }
     createConfetti();
     renderList();
   </script>
