@@ -256,9 +256,12 @@
     }
     function getActiveGroup() { return appData.groups.find(g => g.id === appData.activeGroupId); }
     function getBirthdays() { const g = getActiveGroup(); return g ? g.birthdays : []; }
+    function dedupBirthdays(list) { const seen = new Set(); return list.filter(b => { const key = b.name.trim().toLowerCase() + '|' + b.date; if (seen.has(key)) return false; seen.add(key); return true; }); }
+    function dedupAll() { appData.groups.forEach(g => { g.birthdays = dedupBirthdays(g.birthdays); }); }
     function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(appData)); if (calendarViewActive) renderCalendar(); }
 
     loadData();
+    dedupAll(); save();
 
     const form = document.getElementById('birthdayForm');
     const nameInput = document.getElementById('name');
@@ -355,7 +358,7 @@
       if (calendarViewActive) renderCalendar(); else renderList();
     }
 
-    function handleSubmit(e) { e.preventDefault(); const name = nameInput.value.trim(); const day = daySelect.value; const month = monthSelect.value; if (!name || !day || !month) return; const date = `${String(day).padStart(2,'0')}/${String(month).padStart(2,'0')}`; const editId = editIdInput.value; const birthdays = getBirthdays(); if (editId) { const idx = birthdays.findIndex(b => b.id === editId); if (idx !== -1) { birthdays[idx] = { ...birthdays[idx], name, date }; } cancelEdit(); } else { birthdays.push({ id: generateId(), name, date }); } save(); renderTabs(); if (calendarViewActive) renderCalendar(); else renderList(); form.reset(); }
+    function handleSubmit(e) { e.preventDefault(); const name = nameInput.value.trim(); const day = daySelect.value; const month = monthSelect.value; if (!name || !day || !month) return; const date = `${String(day).padStart(2,'0')}/${String(month).padStart(2,'0')}`; const editId = editIdInput.value; const birthdays = getBirthdays(); if (editId) { const idx = birthdays.findIndex(b => b.id === editId); if (idx !== -1) { birthdays[idx] = { ...birthdays[idx], name, date }; } cancelEdit(); } else { const dup = birthdays.find(b => b.name.trim().toLowerCase() === name.toLowerCase() && b.date === date); if (dup) { alert('هذا الاسم مع هذا التاريخ موجود بالفعل!'); return; } birthdays.push({ id: generateId(), name, date }); } save(); renderTabs(); if (calendarViewActive) renderCalendar(); else renderList(); form.reset(); }
     function cancelEdit() { editIdInput.value = ''; submitBtn.textContent = 'إضافة'; formTitle.textContent = 'إضافة عيد ميلاد جديد'; cancelBtn.style.display = 'none'; form.reset(); monthNameDisplay.textContent = ''; }
     function editBirthday(id) { const birthdays = getBirthdays(); const b = birthdays.find(x => x.id === id); if (!b) return; nameInput.value = b.name; const { day, month } = parseDate(b.date); daySelect.value = day; monthSelect.value = month; updateMonthName(); editIdInput.value = b.id; submitBtn.textContent = 'تحديث'; formTitle.textContent = 'تعديل عيد الميلاد'; cancelBtn.style.display = 'inline-block'; nameInput.focus(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
     function deleteBirthday(id) { if (!confirm('هل أنت متأكد من الحذف؟')) return; const birthdays = getBirthdays(); const g = getActiveGroup(); g.birthdays = birthdays.filter(b => b.id !== id); save(); renderTabs(); if (calendarViewActive) renderCalendar(); else renderList(); }
