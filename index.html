@@ -185,6 +185,29 @@
     .modal-select-all input { width: 18px; height: 18px; accent-color: #667eea; cursor: pointer; }
     .modal-actions { display: flex; gap: 0.8rem; }
     .modal-actions .btn { flex: 1; }
+    .welcome-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(6px); z-index: 99999; display: none; align-items: center; justify-content: center; }
+    .welcome-overlay.show { display: flex; }
+    .welcome-box { background: white; border-radius: 20px; padding: 2rem; width: 90%; max-width: 360px; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .welcome-box h2 { color: #333; margin-bottom: 0.3rem; font-size: 1.3rem; }
+    .welcome-box .welcome-sub { color: #888; font-size: 0.85rem; margin-bottom: 1.5rem; }
+    .welcome-steps { text-align: right; margin-bottom: 1.5rem; }
+    .welcome-step { display: flex; align-items: flex-start; gap: 0.8rem; margin-bottom: 1rem; padding: 0.7rem; background: #f8f9fa; border-radius: 12px; }
+    .welcome-step-num { background: linear-gradient(135deg, #667eea, #764ba2); color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; flex-shrink: 0; }
+    .welcome-step-text { font-size: 0.9rem; color: #333; line-height: 1.5; }
+    .welcome-step-text strong { color: #667eea; }
+    .help-btn { position: fixed; bottom: 1.5rem; left: 1.5rem; width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; border: none; font-size: 1.3rem; cursor: pointer; box-shadow: 0 4px 15px rgba(102,126,234,0.4); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+    .help-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); z-index: 99998; display: none; align-items: center; justify-content: center; }
+    .help-overlay.show { display: flex; }
+    .help-box { background: white; border-radius: 16px; padding: 1.5rem; width: 92%; max-width: 420px; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+    .help-box h2 { text-align: center; color: #333; margin-bottom: 1rem; font-size: 1.2rem; }
+    .help-section { margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid #f0f0f0; }
+    .help-section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .help-section h4 { color: #667eea; margin-bottom: 0.4rem; font-size: 0.95rem; }
+    .help-section p, .help-section li { color: #555; font-size: 0.85rem; line-height: 1.6; }
+    .help-section ol, .help-section ul { padding-right: 1.2rem; margin: 0.3rem 0; }
+    .help-section li { margin-bottom: 0.2rem; }
+    .hidden-advanced { display: none !important; }
+    .hint-text { text-align: center; color: #aaa; font-size: 0.8rem; margin: 0.5rem 0; }
   </style>
 </head>
 <body>
@@ -302,6 +325,115 @@
   <footer>
     <p><span dir="ltr">made with <span class="big-heart">❤️</span></span></p>
   </footer>
+  <button class="help-btn" onclick="document.getElementById('helpOverlay').classList.add('show')" title="مساعدة">؟</button>
+  <div class="welcome-overlay" id="welcomeOverlay">
+    <div class="welcome-box">
+      <h2>🎂 مرحباً بك!</h2>
+      <p class="welcome-sub">قائمة أعياد الميلاد</p>
+      <div class="welcome-steps">
+        <div class="welcome-step">
+          <span class="welcome-step-num">١</span>
+          <span class="welcome-step-text"><strong>أنشئ مجموعة</strong> — اضغط <strong>+</strong> بجانب القائمة المنسدلة وأدخل اسم المجموعة (مثلاً: عائلتي، أصدقائي)</span>
+        </div>
+        <div class="welcome-step">
+          <span class="welcome-step-num">٢</span>
+          <span class="welcome-step-text"><strong>أضف الأسماء</strong> — اكتب الاسم واختر يوم وشهر الميلاد ثم اضغط <strong>"إضافة"</strong></span>
+        </div>
+        <div class="welcome-step">
+          <span class="welcome-step-num">٣</span>
+          <span class="welcome-step-text"><strong>تنقل بين المجموعات</strong> — استخدم القائمة المنسدلة للتنقل وإدارة المجموعات</span>
+        </div>
+      </div>
+      <button class="btn btn-primary" onclick="closeWelcome()" style="width:100%;padding:0.8rem;font-size:1rem;">ابدأ 🎉</button>
+    </div>
+  </div>
+  <div class="help-overlay" id="helpOverlay" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="help-box">
+      <h2>❓ دليل الاستخدام</h2>
+      <div class="help-section">
+        <h4>➕ إضافة عيد ميلاد</h4>
+        <ol>
+          <li>اختر المجموعة من القائمة المنسدلة (أو أنشئ مجموعة جديدة بـ +)</li>
+          <li>اكتب الاسم في حقل "الاسم"</li>
+          <li>أدخل يوم وشهر الميلاد</li>
+          <li>اضغط "إضافة"</li>
+        </ol>
+      </div>
+      <div class="help-section">
+        <h4>✏️ تعديل أو حذف</h4>
+        <ul>
+          <li>اضغط ✏️ لتعديل الاسم أو التاريخ</li>
+          <li>اضغط 🗑️ لحذف اسم واحد</li>
+        </ul>
+      </div>
+      <div class="help-section">
+        <h4>📂 المجموعات</h4>
+        <ul>
+          <li><strong>إنشاء مجموعة:</strong> اضغط + بجانب القائمة المنسدلة</li>
+          <li><strong>تعديل الاسم:</strong> اضغط ✏️ بجانب القائمة المنسدلة</li>
+          <li><strong>حذف مجموعة:</strong> اضغط 🗑️ بجانب القائمة المنسدلة</li>
+          <li><strong>التنقل:</strong> اختر المجموعة من القائمة المنسدلة</li>
+        </ul>
+      </div>
+      <div class="help-section">
+        <h4>📦 نقل أو نسخ أسماء بين المجموعات</h4>
+        <ol>
+          <li>حدد الأسماء بوضع علامات الصح بجانبها</li>
+          <li>شريط الخيارات سيظهر في الأعلى</li>
+          <li>اضغط "📦 نقل إلى" أو "📋 نسخ إلى"</li>
+          <li>اختر المجموعة الوجهة</li>
+          <li>الأسماء ستنتقل/تنسخ تلقائياً (يتم تجاهل المكررات)</li>
+        </ol>
+      </div>
+      <div class="help-section">
+        <h4>💾 التصدير</h4>
+        <ol>
+          <li>اضغط "💾 تصدير"</li>
+          <li>حدد المجموعات التي تريد تصديرها (الكل محدد مسبقاً)</li>
+          <li>اضغط "تصدير"</li>
+          <li>سيُحفظ ملف JSON في جهازك</li>
+          <li>أرسل الملف للشخص الآخر عبر واتساب أو أي تطبيق</li>
+        </ol>
+      </div>
+      <div class="help-section">
+        <h4>📲 المشاركة</h4>
+        <ol>
+          <li>اضغط "📲 مشاركة"</li>
+          <li>حدد المجموعات</li>
+          <li>اضغط "مشاركة"</li>
+          <li>اختر واتساب أو أي تطبيق آخر</li>
+          <li>سترسل البيانات كنص (JSON) — المستقبل يستورد النص</li>
+        </ol>
+      </div>
+      <div class="help-section">
+        <h4>📂 الاستيراد من ملف</h4>
+        <ol>
+          <li>احصل على ملف JSON من شخص آخر ( عبر التصدير أو المشاركة)</li>
+          <li>اضغط "📂 استيراد"</li>
+          <li>اختر الملف من جهازك</li>
+          <li>ستُنشأ مجموعة جديدة بالبيانات المستوردة</li>
+        </ol>
+      </div>
+      <div class="help-section">
+        <h4>📋 اللصق من الحافظة</h4>
+        <ol>
+          <li>انسخ نص JSON من رسالة واتساب أو أي مكان (تحديد النص + نسخ)</li>
+          <li>افتح التطبيق واضغط "📋 لصق"</li>
+          <li>ستُنشأ مجموعة جديدة بالبيانات تلقائياً</li>
+        </ol>
+      </div>
+      <div class="help-section">
+        <h4>📅 عرض التقويم</h4>
+        <ul>
+          <li>اضغط "📅 عرض تقويم" لرؤية أعياد الميلاد كجدول 12 شهراً</li>
+          <li>اضغط مرة أخرى للعودة لعرض القائمة</li>
+        </ul>
+      </div>
+      <div style="text-align:center;margin-top:1rem;">
+        <button class="btn btn-secondary" onclick="document.getElementById('helpOverlay').classList.remove('show')" style="padding:0.6rem 2rem;">إغلاق</button>
+      </div>
+    </div>
+  </div>
   <script>
     const STORAGE_KEY = 'birthdays';
     const monthNames = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
@@ -439,11 +571,11 @@
       if (calendarViewActive) renderCalendar(); else renderList();
     }
 
-    function handleSubmit(e) { e.preventDefault(); const name = nameInput.value.trim(); const day = daySelect.value; const month = monthSelect.value; if (!name || !day || !month) return; const date = `${String(day).padStart(2,'0')}/${String(month).padStart(2,'0')}`; const editId = editIdInput.value; const birthdays = getBirthdays(); if (editId) { const idx = birthdays.findIndex(b => b.id === editId); if (idx !== -1) { birthdays[idx] = { ...birthdays[idx], name, date }; } cancelEdit(); } else {       const dup = birthdays.find(b => b.name.trim().toLowerCase() === name.toLowerCase() && normalizeDate(b.date) === date); if (dup) { alert('هذا الاسم مع هذا التاريخ موجود بالفعل!'); return; } birthdays.push({ id: generateId(), name, date }); } save(); renderTabs(); if (calendarViewActive) renderCalendar(); else renderList(); form.reset(); }
+    function handleSubmit(e) { e.preventDefault(); const name = nameInput.value.trim(); const day = daySelect.value; const month = monthSelect.value; if (!name || !day || !month) return; const date = `${String(day).padStart(2,'0')}/${String(month).padStart(2,'0')}`; const editId = editIdInput.value; const birthdays = getBirthdays(); if (editId) { const idx = birthdays.findIndex(b => b.id === editId); if (idx !== -1) { birthdays[idx] = { ...birthdays[idx], name, date }; } cancelEdit(); } else {       const dup = birthdays.find(b => b.name.trim().toLowerCase() === name.toLowerCase() && normalizeDate(b.date) === date); if (dup) { alert('هذا الاسم مع هذا التاريخ موجود بالفعل!'); return; } birthdays.push({ id: generateId(), name, date }); } save(); renderTabs(); if (calendarViewActive) renderCalendar(); else renderList(); updateAdvancedVisibility(); form.reset(); }
     function cancelEdit() { editIdInput.value = ''; submitBtn.textContent = 'إضافة'; formTitle.textContent = 'إضافة عيد ميلاد جديد'; cancelBtn.style.display = 'none'; form.reset(); monthNameDisplay.textContent = ''; }
     function editBirthday(id) { const birthdays = getBirthdays(); const b = birthdays.find(x => x.id === id); if (!b) return; nameInput.value = b.name; const { day, month } = parseDate(b.date); daySelect.value = day; monthSelect.value = month; updateMonthName(); editIdInput.value = b.id; submitBtn.textContent = 'تحديث'; formTitle.textContent = 'تعديل عيد الميلاد'; cancelBtn.style.display = 'inline-block'; nameInput.focus(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
-    function deleteBirthday(id) { if (!confirm('هل أنت متأكد من الحذف؟')) return; const birthdays = getBirthdays(); const g = getActiveGroup(); g.birthdays = birthdays.filter(b => b.id !== id); save(); renderTabs(); if (calendarViewActive) renderCalendar(); else renderList(); }
-    function deleteAll() { if (!confirm('هل أنت متأكد من حذف جميع أعياد الميلاد في هذه المجموعة؟')) return; getActiveGroup().birthdays = []; save(); renderTabs(); if (calendarViewActive) renderCalendar(); else renderList(); }
+    function deleteBirthday(id) { if (!confirm('هل أنت متأكد من الحذف؟')) return; const birthdays = getBirthdays(); const g = getActiveGroup(); g.birthdays = birthdays.filter(b => b.id !== id); save(); renderTabs(); if (calendarViewActive) renderCalendar(); else renderList(); updateAdvancedVisibility(); }
+    function deleteAll() { if (!confirm('هل أنت متأكد من حذف جميع أعياد الميلاد في هذه المجموعة؟')) return; getActiveGroup().birthdays = []; save(); renderTabs(); if (calendarViewActive) renderCalendar(); else renderList(); updateAdvancedVisibility(); }
     function exportData() {
       const list = document.getElementById('exportGroupsList');
       list.innerHTML = '';
@@ -525,10 +657,10 @@
           appData.groups.push({ id: generateId(), name: 'مستورد', birthdays: data, color: groupColors[appData.groups.length % groupColors.length] });
         } else { alert('البيانات في الحافظة غير صالحة!'); return; }
         save(); renderTabs(); if (calendarViewActive) renderCalendar(); else renderList();
-        alert('تم الاستيراد بنجاح!');
+        alert('تم الاستيراد بنجاح!'); updateAdvancedVisibility();
       } catch { alert('لا توجد بيانات في الحافظة أو البيانات غير صالحة!'); }
     }
-    function importData(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const data = JSON.parse(e.target.result); if (data.groups) { data.groups.forEach(ig => { appData.groups.push({ id: generateId(), name: ig.name, birthdays: ig.birthdays, color: ig.color || groupColors[appData.groups.length % groupColors.length] }); }); } else if (Array.isArray(data)) { appData.groups.push({ id: generateId(), name: 'مستورد', birthdays: data, color: groupColors[appData.groups.length % groupColors.length] }); } else { alert('الملف غير صالح'); return; } save(); renderTabs(); if (calendarViewActive) renderCalendar(); else renderList(); alert('تم الاستيراد بنجاح!'); } catch { alert('خطأ في قراءة الملف'); } }; reader.readAsText(file); event.target.value = ''; }
+    function importData(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const data = JSON.parse(e.target.result); if (data.groups) { data.groups.forEach(ig => { appData.groups.push({ id: generateId(), name: ig.name, birthdays: ig.birthdays, color: ig.color || groupColors[appData.groups.length % groupColors.length] }); }); } else if (Array.isArray(data)) { appData.groups.push({ id: generateId(), name: 'مستورد', birthdays: data, color: groupColors[appData.groups.length % groupColors.length] }); } else { alert('الملف غير صالح'); return; } save(); renderTabs(); if (calendarViewActive) renderCalendar(); else renderList(); alert('تم الاستيراد بنجاح!'); updateAdvancedVisibility(); } catch { alert('خطأ في قراءة الملف'); } }; reader.readAsText(file); event.target.value = ''; }
     function getFilteredBirthdays() { const query = searchInput.value.trim().toLowerCase(); const filterMonth = parseInt(monthFilter.value); return getBirthdays().filter(b => { const matchesName = b.name.toLowerCase().includes(query); const { month } = parseDate(b.date); return matchesName && (filterMonth === 0 || month === filterMonth); }); }
     function updateStats() { const filtered = getFilteredBirthdays(); if (filtered.length === 0) { statsContainer.textContent = ''; return; } const todayCount = filtered.filter(b => isToday(b.date)).length; statsContainer.textContent = `إجمالي الأعياد: ${filtered.length}${todayCount > 0 ? ` | أعياد اليوم: ${todayCount}` : ''}`; }
     let selectedIds = new Set();
@@ -569,7 +701,7 @@
       }
       const count = bulkAction === 'move' ? toMove.length : toMove.filter(b => !targetSeen.has(b.name.trim().toLowerCase() + '|' + normalizeDate(b.date))).length;
       selectedIds.clear();
-      save(); renderTabs(); renderList();
+      save(); renderTabs(); renderList(); updateAdvancedVisibility();
       alert(`تم ${bulkAction === 'move' ? 'نقل' : 'نسخ'} ${count} ${bulkAction === 'move' ? 'اسم' : 'اسم جديد'} إلى "${target.name}"`);
     }
     function bulkMove() { showGroupPicker('move'); }
@@ -579,7 +711,7 @@
       const source = getActiveGroup();
       source.birthdays = source.birthdays.filter(b => !selectedIds.has(b.id));
       selectedIds.clear();
-      save(); renderTabs(); renderList();
+      save(); renderTabs(); renderList(); updateAdvancedVisibility();
     }
     function saveAsPDF() { const now = new Date(); const d = String(now.getDate()).padStart(2,'0'); const m = String(now.getMonth()+1).padStart(2,'0'); const y = now.getFullYear(); const h = String(now.getHours()).padStart(2,'0'); const min = String(now.getMinutes()).padStart(2,'0'); document.getElementById('pdfDate').textContent = `Created: ${d}/${m}/${y} ${h}:${min}`; const wasCalendar = calendarViewActive; if (!calendarViewActive) { calendarViewActive = true; calendarGrid.style.display = 'grid'; listContainer.style.display = 'none'; renderCalendar(); } document.body.classList.add('pdf-mode'); setTimeout(() => { window.print(); setTimeout(() => { document.body.classList.remove('pdf-mode'); if (!wasCalendar) { calendarViewActive = false; calendarGrid.style.display = 'none'; listContainer.style.display = 'flex'; renderList(); } }, 500); }, 100); }
     function createConfetti() { const container = document.getElementById('confetti'); const colors = ['#e74c3c','#e91e63','#9c27b0','#3f51b5','#2196f3','#4caf50','#ff9800','#f44336']; for (let i = 0; i < 12; i++) { const piece = document.createElement('div'); piece.className = 'confetti-piece'; piece.style.left = Math.random() * 100 + '%'; piece.style.background = `radial-gradient(circle at 30% 30%, ${colors[i % colors.length]}dd, ${colors[i % colors.length]})`; piece.style.animationDelay = Math.random() * 8 + 's'; piece.style.animationDuration = (Math.random() * 5 + 8) + 's'; container.appendChild(piece); } }
@@ -588,9 +720,23 @@
     const calendarToggle = document.getElementById('calendarToggle');
     function toggleCalendarView() { calendarViewActive = !calendarViewActive; calendarGrid.style.display = calendarViewActive ? 'grid' : 'none'; listContainer.style.display = calendarViewActive ? 'none' : 'flex'; calendarToggle.classList.toggle('active', calendarViewActive); if (calendarViewActive) renderCalendar(); else renderList(); }
     function renderCalendar() { calendarGrid.innerHTML = ''; const filtered = getFilteredBirthdays(); updateStats(); for (let m = 1; m <= 12; m++) { const monthBirthdays = filtered.filter(b => { const { month } = parseDate(b.date); return month === m; }).sort((a, b) => parseDate(a.date).day - parseDate(b.date).day); const cell = document.createElement('div'); cell.className = 'cal-month'; cell.innerHTML = `<div class="cal-month-header month-${m}"><span>${monthEmojis[m-1]} ${monthNames[m-1]}</span><span class="count">${monthBirthdays.length}</span></div><div class="cal-month-body">${monthBirthdays.length === 0 ? '<div class="cal-empty">—</div>' : monthBirthdays.map(b => { const today = isToday(b.date); const { day } = parseDate(b.date); const daysLeft = getNextBirthday(b.date); return `<div class="cal-bday${today ? ' today' : ''}"><span class="cal-bday-name">${b.name}</span><span class="cal-bday-date"><span>${String(day).padStart(2,'0')}/${String(m).padStart(2,'0')}</span>${daysLeft === 0 ? '<span>✨</span>' : `<span class="days-sep">–</span><span class="days-count" dir="rtl">${daysLeft} يوم</span>`}</span></div>`; }).join('')}</div>`; calendarGrid.appendChild(cell); } }
+    function closeWelcome() { document.getElementById('welcomeOverlay').classList.remove('show'); localStorage.setItem('welcomed', '1'); }
+    function updateAdvancedVisibility() {
+      const totalBirthdays = appData.groups.reduce((sum, g) => sum + g.birthdays.length, 0);
+      const hasData = totalBirthdays > 0;
+      const advancedEls = document.querySelectorAll('#calendarToggle, .btn-pdf, .btn-export, .btn-share, .btn-import, .btn-paste, .btn-delete-all');
+      advancedEls.forEach(el => { el.classList.toggle('hidden-advanced', !hasData); });
+      const controls = document.querySelector('.controls');
+      let hint = document.getElementById('hintText');
+      if (!hasData) {
+        if (!hint) { hint = document.createElement('div'); hint.id = 'hintText'; hint.className = 'hint-text'; hint.textContent = 'أضف أول اسم لفتح المزيد من الخيارات'; controls.after(hint); }
+      } else if (hint) { hint.remove(); }
+    }
     createConfetti();
     renderTabs();
     renderList();
+    if (!localStorage.getItem('welcomed')) { document.getElementById('welcomeOverlay').classList.add('show'); }
+    updateAdvancedVisibility();
   </script>
 </body>
 </html>
