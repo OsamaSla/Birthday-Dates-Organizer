@@ -81,6 +81,8 @@
     .btn-pdf:hover, .btn-delete-all:hover { background: white; transform: translateY(-2px); }
     .btn-sm { padding: 0.4rem 0.8rem; font-size: 0.8rem; border-radius: 8px; background: rgba(255,255,255,0.9); color: #333; white-space: nowrap; }
     .btn-sm:hover { background: white; transform: translateY(-1px); }
+    .btn-share { background: rgba(37,211,102,0.9); color: white; }
+    .btn-share:hover { background: rgba(37,211,102,1); }
     .btn-delete-all { background: rgba(255,100,100,0.9); color: white; }
     .btn-delete-all:hover { background: rgba(255,80,80,1); }
     .stats { color: white; text-align: center; margin-bottom: 1.5rem; font-size: 1rem; opacity: 0.9; }
@@ -231,6 +233,7 @@
         <button class="btn btn-sm btn-calendar" id="calendarToggle" onclick="toggleCalendarView()">📅 عرض تقويم</button>
         <button class="btn btn-pdf" onclick="saveAsPDF()">📄 حفظ PDF</button>
         <button class="btn btn-sm btn-export" onclick="exportData()">💾 تصدير</button>
+        <button class="btn btn-sm btn-share" onclick="shareData()">📲 مشاركة</button>
         <button class="btn btn-sm btn-import" onclick="document.getElementById('importFile').click()">📂 استيراد</button>
         <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
         <button class="btn btn-delete-all" onclick="deleteAll()">🗑️ حذف الكل</button>
@@ -425,6 +428,19 @@
     function updateSelectAll() { const all = document.querySelectorAll('#exportGroupsList input[type="checkbox"]'); const selectAll = document.getElementById('expSelectAll'); selectAll.checked = [...all].every(cb => cb.checked); }
     function closeExportModal() { document.getElementById('exportModal').classList.remove('show'); }
     function confirmExport() { const selected = []; document.querySelectorAll('#exportGroupsList .modal-group-item input[type="checkbox"]').forEach(cb => { if (cb.checked) { const id = cb.id.replace('exp_', ''); const g = appData.groups.find(x => x.id === id); if (g) selected.push(g); } }); if (selected.length === 0) { alert('اختر مجموعة واحدة على الأقل!'); return; } const exportData = { groups: selected, activeGroupId: selected[0].id }; const dataStr = JSON.stringify(exportData, null, 2); const blob = new Blob([dataStr], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'birthdays.json'; a.click(); URL.revokeObjectURL(url); closeExportModal(); }
+    function shareData() {
+      if (navigator.share && navigator.canShare) {
+        const dataStr = JSON.stringify(appData, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const file = new File([blob], 'birthdays.json', { type: 'application/json' });
+        const shareData = { title: 'أعياد الميلاد', text: 'قائمة أعياد ميلاد', files: [file] };
+        if (navigator.canShare(shareData)) {
+          navigator.share(shareData).catch(() => {});
+          return;
+        }
+      }
+      alert('مشاركة الملفات غير مدعومة في هذا المتصفح. استخدم تصدير JSON ثم أرسل الملف يدوياً.');
+    }
     function importData(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const data = JSON.parse(e.target.result); if (data.groups) { data.groups.forEach(ig => { const existing = appData.groups.find(g => g.name.trim().toLowerCase() === ig.name.trim().toLowerCase()); if (existing) { const seen = new Set(existing.birthdays.map(b => b.name.trim().toLowerCase() + '|' + normalizeDate(b.date))); ig.birthdays.forEach(b => { const key = b.name.trim().toLowerCase() + '|' + normalizeDate(b.date); if (!seen.has(key)) { existing.birthdays.push(b); seen.add(key); } }); } else { const newId = generateId(); appData.groups.push({ id: newId, name: ig.name, birthdays: ig.birthdays, color: ig.color || groupColors[appData.groups.length % groupColors.length] }); } }); } else if (Array.isArray(data)) { const gid = generateId(); appData.groups.push({ id: gid, name: 'مستورد', birthdays: data, color: groupColors[appData.groups.length % groupColors.length] }); } else { alert('الملف غير صالح'); return; } save(); renderTabs(); if (calendarViewActive) renderCalendar(); else renderList(); alert('تم الاستيراد بنجاح!'); } catch { alert('خطأ في قراءة الملف'); } }; reader.readAsText(file); event.target.value = ''; }
     function getFilteredBirthdays() { const query = searchInput.value.trim().toLowerCase(); const filterMonth = parseInt(monthFilter.value); return getBirthdays().filter(b => { const matchesName = b.name.toLowerCase().includes(query); const { month } = parseDate(b.date); return matchesName && (filterMonth === 0 || month === filterMonth); }); }
     function updateStats() { const filtered = getFilteredBirthdays(); if (filtered.length === 0) { statsContainer.textContent = ''; return; } const todayCount = filtered.filter(b => isToday(b.date)).length; statsContainer.textContent = `إجمالي الأعياد: ${filtered.length}${todayCount > 0 ? ` | أعياد اليوم: ${todayCount}` : ''}`; }
