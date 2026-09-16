@@ -427,25 +427,74 @@
     function editBirthday(id) { const birthdays = getBirthdays(); const b = birthdays.find(x => x.id === id); if (!b) return; nameInput.value = b.name; const { day, month } = parseDate(b.date); daySelect.value = day; monthSelect.value = month; updateMonthName(); editIdInput.value = b.id; submitBtn.textContent = 'تحديث'; formTitle.textContent = 'تعديل عيد الميلاد'; cancelBtn.style.display = 'inline-block'; nameInput.focus(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
     function deleteBirthday(id) { if (!confirm('هل أنت متأكد من الحذف؟')) return; const birthdays = getBirthdays(); const g = getActiveGroup(); g.birthdays = birthdays.filter(b => b.id !== id); save(); renderTabs(); if (calendarViewActive) renderCalendar(); else renderList(); }
     function deleteAll() { if (!confirm('هل أنت متأكد من حذف جميع أعياد الميلاد في هذه المجموعة؟')) return; getActiveGroup().birthdays = []; save(); renderTabs(); if (calendarViewActive) renderCalendar(); else renderList(); }
-    function exportData() { const list = document.getElementById('exportGroupsList'); list.innerHTML = ''; appData.groups.forEach(g => { const color = g.color || '#667eea'; const item = document.createElement('div'); item.className = 'modal-group-item'; item.innerHTML = `<input type="checkbox" id="exp_${g.id}" checked><label for="exp_${g.id}"><span class="group-color-dot" style="background:${color}"></span>${g.name}<span class="group-count">(${g.birthdays.length})</span></label>`; item.addEventListener('click', (e) => { if (e.target.tagName !== 'INPUT') { const cb = item.querySelector('input'); cb.checked = !cb.checked; } updateSelectAll(); }); list.appendChild(item); }); const selectAllDiv = document.createElement('div'); selectAllDiv.className = 'modal-select-all'; selectAllDiv.innerHTML = `<input type="checkbox" id="expSelectAll" checked><label for="expSelectAll">تحديد الكل</label>`; selectAllDiv.addEventListener('click', (e) => { if (e.target.tagName !== 'INPUT') { const cb = selectAllDiv.querySelector('input'); cb.checked = !cb.checked; } const checked = selectAllDiv.querySelector('input').checked; list.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = checked); }); list.insertBefore(selectAllDiv, list.firstChild); document.getElementById('exportModal').classList.add('show'); }
+    function exportData() {
+      const list = document.getElementById('exportGroupsList');
+      list.innerHTML = '';
+      appData.groups.forEach(g => {
+        const color = g.color || '#667eea';
+        const item = document.createElement('div');
+        item.className = 'modal-group-item';
+        item.innerHTML = `<input type="checkbox" id="exp_${g.id}" checked><label for="exp_${g.id}"><span class="group-color-dot" style="background:${color}"></span>${g.name}<span class="group-count">(${g.birthdays.length})</span></label>`;
+        item.addEventListener('click', (e) => { if (e.target.tagName !== 'INPUT') { item.querySelector('input').checked = !item.querySelector('input').checked; } updateSelectAll(); });
+        list.appendChild(item);
+      });
+      const selectAllDiv = document.createElement('div');
+      selectAllDiv.className = 'modal-select-all';
+      selectAllDiv.innerHTML = `<input type="checkbox" id="expSelectAll" checked><label for="expSelectAll">تحديد الكل</label>`;
+      selectAllDiv.addEventListener('click', (e) => { if (e.target.tagName !== 'INPUT') { selectAllDiv.querySelector('input').checked = !selectAllDiv.querySelector('input').checked; } const checked = selectAllDiv.querySelector('input').checked; list.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = checked); });
+      list.insertBefore(selectAllDiv, list.firstChild);
+      document.getElementById('exportModal').querySelector('h3').textContent = 'اختر المجموعات للتصدير';
+      document.getElementById('exportModal').querySelector('.btn-primary').textContent = 'تصدير';
+      document.getElementById('exportModal').querySelector('.btn-primary').setAttribute('onclick', 'confirmExport()');
+      document.getElementById('exportModal').classList.add('show');
+    }
     function updateSelectAll() { const all = document.querySelectorAll('#exportGroupsList input[type="checkbox"]'); const selectAll = document.getElementById('expSelectAll'); selectAll.checked = [...all].every(cb => cb.checked); }
-    function closeExportModal() { document.getElementById('exportModal').classList.remove('show'); }
+    function closeExportModal() { document.getElementById('exportModal').classList.remove('show'); resetModalLabels(); }
+    function resetModalLabels() {
+      document.getElementById('exportModal').querySelector('h3').textContent = 'اختر المجموعات للتصدير';
+      document.getElementById('exportModal').querySelector('.btn-primary').textContent = 'تصدير';
+      document.getElementById('exportModal').querySelector('.btn-primary').setAttribute('onclick', 'confirmExport()');
+    }
     function confirmExport() { const selected = []; document.querySelectorAll('#exportGroupsList .modal-group-item input[type="checkbox"]').forEach(cb => { if (cb.checked) { const id = cb.id.replace('exp_', ''); const g = appData.groups.find(x => x.id === id); if (g) selected.push(g); } }); if (selected.length === 0) { alert('اختر مجموعة واحدة على الأقل!'); return; } const exportData = { groups: selected, activeGroupId: selected[0].id }; const dataStr = JSON.stringify(exportData, null, 2); const blob = new Blob([dataStr], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'birthdays.json'; a.click(); URL.revokeObjectURL(url); closeExportModal(); }
-    function shareData() {
-      const dataStr = JSON.stringify(appData, null, 2);
+    function shareData() { showShareModal(); }
+    function showShareModal() {
+      const list = document.getElementById('exportGroupsList');
+      list.innerHTML = '';
+      appData.groups.forEach(g => {
+        const color = g.color || '#667eea';
+        const item = document.createElement('div');
+        item.className = 'modal-group-item';
+        item.innerHTML = `<input type="checkbox" id="exp_${g.id}" checked><label for="exp_${g.id}"><span class="group-color-dot" style="background:${color}"></span>${g.name}<span class="group-count">(${g.birthdays.length})</span></label>`;
+        item.addEventListener('click', (e) => { if (e.target.tagName !== 'INPUT') { item.querySelector('input').checked = !item.querySelector('input').checked; } updateSelectAll(); });
+        list.appendChild(item);
+      });
+      const selectAllDiv = document.createElement('div');
+      selectAllDiv.className = 'modal-select-all';
+      selectAllDiv.innerHTML = `<input type="checkbox" id="expSelectAll" checked><label for="expSelectAll">تحديد الكل</label>`;
+      selectAllDiv.addEventListener('click', (e) => { if (e.target.tagName !== 'INPUT') { selectAllDiv.querySelector('input').checked = !selectAllDiv.querySelector('input').checked; } const checked = selectAllDiv.querySelector('input').checked; list.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = checked); });
+      list.insertBefore(selectAllDiv, list.firstChild);
+      document.getElementById('exportModal').querySelector('h3').textContent = 'اختر المجموعات للمشاركة';
+      document.getElementById('exportModal').querySelector('.btn-primary').textContent = 'مشاركة';
+      document.getElementById('exportModal').querySelector('.btn-primary').setAttribute('onclick', 'confirmShare()');
+      document.getElementById('exportModal').classList.add('show');
+    }
+    function confirmShare() {
+      const selected = [];
+      document.querySelectorAll('#exportGroupsList .modal-group-item input[type="checkbox"]').forEach(cb => {
+        if (cb.checked) { const id = cb.id.replace('exp_', ''); const g = appData.groups.find(x => x.id === id); if (g) selected.push(g); }
+      });
+      if (selected.length === 0) { alert('اختر مجموعة واحدة على الأقل!'); return; }
+      const shareObj = { groups: selected, activeGroupId: selected[0].id };
+      const dataStr = JSON.stringify(shareObj, null, 2);
       if (navigator.share) {
         navigator.share({ title: 'أعياد الميلاد', text: dataStr }).catch(() => {});
       } else {
         navigator.clipboard.writeText(dataStr).then(() => {
           alert('تم نسخ البيانات! الصقها في واتساب أو أي تطبيق آخر.');
-        }).catch(() => {
-          const blob = new Blob([dataStr], { type: 'text/plain' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url; a.download = 'birthdays.txt'; a.click();
-          URL.revokeObjectURL(url);
-        });
+        }).catch(() => {});
       }
+      closeExportModal();
+      resetModalLabels();
     }
     async function importFromClipboard() {
       try {
