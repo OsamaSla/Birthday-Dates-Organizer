@@ -430,16 +430,18 @@
     function confirmExport() { const selected = []; document.querySelectorAll('#exportGroupsList .modal-group-item input[type="checkbox"]').forEach(cb => { if (cb.checked) { const id = cb.id.replace('exp_', ''); const g = appData.groups.find(x => x.id === id); if (g) selected.push(g); } }); if (selected.length === 0) { alert('اختر مجموعة واحدة على الأقل!'); return; } const exportData = { groups: selected, activeGroupId: selected[0].id }; const dataStr = JSON.stringify(exportData, null, 2); const blob = new Blob([dataStr], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'birthdays.json'; a.click(); URL.revokeObjectURL(url); closeExportModal(); }
     function shareData() {
       const dataStr = JSON.stringify(appData, null, 2);
-      const blob = new Blob([dataStr], { type: 'application/json' });
-      const file = new File([blob], 'birthdays.json', { type: 'application/json' });
-      if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
-        navigator.share({ title: 'أعياد الميلاد', text: 'قائمة أعياد ميلاد', files: [file] }).catch(() => {});
+      if (navigator.share) {
+        navigator.share({ title: 'أعياد الميلاد', text: dataStr }).catch(() => {});
       } else {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'birthdays.json'; a.click();
-        URL.revokeObjectURL(url);
-        alert('تم تحميل الملف. أرسله يدوياً عبر واتساب أو أي تطبيق آخر.');
+        navigator.clipboard.writeText(dataStr).then(() => {
+          alert('تم نسخ البيانات! الصقها في واتساب أو أي تطبيق آخر.');
+        }).catch(() => {
+          const blob = new Blob([dataStr], { type: 'text/plain' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = 'birthdays.txt'; a.click();
+          URL.revokeObjectURL(url);
+        });
       }
     }
     function importData(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const data = JSON.parse(e.target.result); if (data.groups) { data.groups.forEach(ig => { const existing = appData.groups.find(g => g.name.trim().toLowerCase() === ig.name.trim().toLowerCase()); if (existing) { const seen = new Set(existing.birthdays.map(b => b.name.trim().toLowerCase() + '|' + normalizeDate(b.date))); ig.birthdays.forEach(b => { const key = b.name.trim().toLowerCase() + '|' + normalizeDate(b.date); if (!seen.has(key)) { existing.birthdays.push(b); seen.add(key); } }); } else { const newId = generateId(); appData.groups.push({ id: newId, name: ig.name, birthdays: ig.birthdays, color: ig.color || groupColors[appData.groups.length % groupColors.length] }); } }); } else if (Array.isArray(data)) { const gid = generateId(); appData.groups.push({ id: gid, name: 'مستورد', birthdays: data, color: groupColors[appData.groups.length % groupColors.length] }); } else { alert('الملف غير صالح'); return; } save(); renderTabs(); if (calendarViewActive) renderCalendar(); else renderList(); alert('تم الاستيراد بنجاح!'); } catch { alert('خطأ في قراءة الملف'); } }; reader.readAsText(file); event.target.value = ''; }
