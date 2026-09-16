@@ -34,6 +34,11 @@
     .tab .tab-count { background: rgba(0,0,0,0.1); padding: 0.1rem 0.4rem; border-radius: 10px; font-size: 0.7rem; }
     .tab-add { padding: 0.6rem 1rem; border: 2px dashed rgba(255,255,255,0.3); border-radius: 12px; background: transparent; color: rgba(255,255,255,0.5); font-size: 1.2rem; cursor: pointer; transition: all 0.3s ease; flex-shrink: 0; }
     .tab-add:hover { border-color: rgba(255,255,255,0.6); color: white; background: rgba(255,255,255,0.1); }
+    .group-dropdown-row { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 1.5rem; }
+    .group-dropdown { flex: 1; padding: 0.7rem 1rem; border: 2px solid rgba(255,255,255,0.3); border-radius: 12px; font-size: 1rem; font-family: 'Tajawal', sans-serif; background: rgba(255,255,255,0.9); direction: rtl; cursor: pointer; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: 12px center; padding-left: 30px; }
+    .group-dropdown:focus { outline: none; border-color: white; box-shadow: 0 0 0 3px rgba(255,255,255,0.3); }
+    .group-dropdown-add { padding: 0.6rem 1rem; border: 2px dashed rgba(255,255,255,0.3); border-radius: 12px; background: transparent; color: rgba(255,255,255,0.5); font-size: 1.2rem; cursor: pointer; transition: all 0.3s ease; flex-shrink: 0; }
+    .group-dropdown-add:hover { border-color: rgba(255,255,255,0.6); color: white; background: rgba(255,255,255,0.1); }
     .tab-menu-btn { font-size: 0.8rem; cursor: pointer; padding: 2px 4px; border-radius: 6px; border: none; background: none; color: inherit; opacity: 0.4; transition: opacity 0.2s, background 0.2s; }
     .tab-menu-btn:hover, .tab-menu-btn.active { opacity: 1; background: rgba(0,0,0,0.1); }
     .tab.active .tab-menu-btn { opacity: 0.6; }
@@ -156,6 +161,10 @@
     </div>
     <div class="pdf-date" id="pdfDate"></div>
     <div class="tabs-container" id="tabsContainer"></div>
+    <div class="group-dropdown-row" id="groupDropdownRow" style="display:none;">
+      <select class="group-dropdown" id="groupDropdown"></select>
+      <button class="group-dropdown-add" onclick="createGroup()" title="إضافة مجموعة جديدة">+</button>
+    </div>
     <div class="tab-context-overlay" id="tabContextOverlay" onclick="closeTabMenu()"></div>
     <div class="tab-context-menu" id="tabContextMenu"></div>
     <div class="form-container">
@@ -290,23 +299,41 @@
     function getNextBirthday(dateStr) { const today = new Date(); const { day, month } = parseDate(dateStr); const thisYear = new Date(today.getFullYear(), month - 1, day); if (thisYear < today) thisYear.setFullYear(today.getFullYear() + 1); return Math.ceil((thisYear - today) / (1000 * 60 * 60 * 24)); }
 
     function renderTabs() {
-      tabsContainer.innerHTML = '';
-      appData.groups.forEach(g => {
-        const color = g.color || groupColors[appData.groups.indexOf(g) % groupColors.length];
-        const isActive = g.id === appData.activeGroupId;
-        const tab = document.createElement('button');
-        tab.className = `tab${isActive ? ' active' : ''}`;
-        if (isActive) { tab.style.background = color; tab.style.color = 'white'; } else { tab.style.background = color + '33'; tab.style.color = color; }
-        tab.innerHTML = `<span>${g.name}</span><span class="tab-count" style="${isActive ? 'background:rgba(255,255,255,0.25);color:white' : 'background:' + color + '22'}">${g.birthdays.length}</span><span class="tab-menu-btn" onclick="event.stopPropagation();showTabMenu(event,'${g.id}')" style="color:inherit">⋮</span>`;
-        tab.addEventListener('click', () => switchGroup(g.id));
-        tabsContainer.appendChild(tab);
-      });
-      const addBtn = document.createElement('button');
-      addBtn.className = 'tab-add';
-      addBtn.textContent = '+';
-      addBtn.title = 'إضافة مجموعة جديدة';
-      addBtn.addEventListener('click', createGroup);
-      tabsContainer.appendChild(addBtn);
+      const tabsEl = document.getElementById('tabsContainer');
+      const dropRow = document.getElementById('groupDropdownRow');
+      const useDropdown = appData.groups.length > 5;
+      tabsEl.style.display = useDropdown ? 'none' : 'flex';
+      dropRow.style.display = useDropdown ? 'flex' : 'none';
+      if (useDropdown) {
+        const sel = document.getElementById('groupDropdown');
+        sel.innerHTML = '';
+        appData.groups.forEach(g => {
+          const opt = document.createElement('option');
+          opt.value = g.id;
+          opt.textContent = g.name + ' (' + g.birthdays.length + ')';
+          opt.selected = g.id === appData.activeGroupId;
+          sel.appendChild(opt);
+        });
+        sel.onchange = () => switchGroup(sel.value);
+      } else {
+        tabsEl.innerHTML = '';
+        appData.groups.forEach(g => {
+          const color = g.color || groupColors[appData.groups.indexOf(g) % groupColors.length];
+          const isActive = g.id === appData.activeGroupId;
+          const tab = document.createElement('button');
+          tab.className = `tab${isActive ? ' active' : ''}`;
+          if (isActive) { tab.style.background = color; tab.style.color = 'white'; } else { tab.style.background = color + '33'; tab.style.color = color; }
+          tab.innerHTML = `<span>${g.name}</span><span class="tab-count" style="${isActive ? 'background:rgba(255,255,255,0.25);color:white' : 'background:' + color + '22'}">${g.birthdays.length}</span><span class="tab-menu-btn" onclick="event.stopPropagation();showTabMenu(event,'${g.id}')" style="color:inherit">⋮</span>`;
+          tab.addEventListener('click', () => switchGroup(g.id));
+          tabsEl.appendChild(tab);
+        });
+        const addBtn = document.createElement('button');
+        addBtn.className = 'tab-add';
+        addBtn.textContent = '+';
+        addBtn.title = 'إضافة مجموعة جديدة';
+        addBtn.addEventListener('click', createGroup);
+        tabsEl.appendChild(addBtn);
+      }
     }
     let activeTabMenuId = null;
     function showTabMenu(e, id) {
@@ -369,7 +396,7 @@
     function deleteBirthday(id) { if (!confirm('هل أنت متأكد من الحذف؟')) return; const birthdays = getBirthdays(); const g = getActiveGroup(); g.birthdays = birthdays.filter(b => b.id !== id); save(); renderTabs(); if (calendarViewActive) renderCalendar(); else renderList(); }
     function deleteAll() { if (!confirm('هل أنت متأكد من حذف جميع أعياد الميلاد في هذه المجموعة؟')) return; getActiveGroup().birthdays = []; save(); renderTabs(); if (calendarViewActive) renderCalendar(); else renderList(); }
     function exportData() { const dataStr = JSON.stringify(appData, null, 2); const blob = new Blob([dataStr], { type: 'application/json' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'birthdays.json'; a.click(); URL.revokeObjectURL(url); }
-    function importData(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const data = JSON.parse(e.target.result); if (data.groups) { appData = data; } else if (Array.isArray(data)) { const gid = generateId(); appData = { groups: [{ id: gid, name: 'الكل', birthdays: data }], activeGroupId: gid }; } else { alert('الملف غير صالح'); return; } save(); renderTabs(); if (calendarViewActive) renderCalendar(); else renderList(); alert('تم الاستيراد بنجاح!'); } catch { alert('خطأ في قراءة الملف'); } }; reader.readAsText(file); event.target.value = ''; }
+    function importData(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const data = JSON.parse(e.target.result); if (data.groups) { data.groups.forEach(ig => { const existing = appData.groups.find(g => g.name.trim().toLowerCase() === ig.name.trim().toLowerCase()); if (existing) { const seen = new Set(existing.birthdays.map(b => b.name.trim().toLowerCase() + '|' + normalizeDate(b.date))); ig.birthdays.forEach(b => { const key = b.name.trim().toLowerCase() + '|' + normalizeDate(b.date); if (!seen.has(key)) { existing.birthdays.push(b); seen.add(key); } }); } else { const newId = generateId(); appData.groups.push({ id: newId, name: ig.name, birthdays: ig.birthdays, color: ig.color || groupColors[appData.groups.length % groupColors.length] }); } }); } else if (Array.isArray(data)) { const gid = generateId(); appData.groups.push({ id: gid, name: 'مستورد', birthdays: data, color: groupColors[appData.groups.length % groupColors.length] }); } else { alert('الملف غير صالح'); return; } save(); renderTabs(); if (calendarViewActive) renderCalendar(); else renderList(); alert('تم الاستيراد بنجاح!'); } catch { alert('خطأ في قراءة الملف'); } }; reader.readAsText(file); event.target.value = ''; }
     function getFilteredBirthdays() { const query = searchInput.value.trim().toLowerCase(); const filterMonth = parseInt(monthFilter.value); return getBirthdays().filter(b => { const matchesName = b.name.toLowerCase().includes(query); const { month } = parseDate(b.date); return matchesName && (filterMonth === 0 || month === filterMonth); }); }
     function updateStats() { const filtered = getFilteredBirthdays(); if (filtered.length === 0) { statsContainer.textContent = ''; return; } const todayCount = filtered.filter(b => isToday(b.date)).length; statsContainer.textContent = `إجمالي الأعياد: ${filtered.length}${todayCount > 0 ? ` | أعياد اليوم: ${todayCount}` : ''}`; }
     function renderList() { let filtered = getFilteredBirthdays(); filtered.sort((a, b) => { const pa = parseDate(a.date); const pb = parseDate(b.date); return (pa.month - pb.month) || (pa.day - pb.day); }); listContainer.innerHTML = ''; if (filtered.length === 0) { emptyState.style.display = 'block'; statsContainer.textContent = ''; return; } emptyState.style.display = 'none'; updateStats(); const groups = {}; filtered.forEach(b => { const { month } = parseDate(b.date); if (!groups[month]) groups[month] = []; groups[month].push(b); }); Object.keys(groups).sort((a, b) => a - b).forEach(month => { const m = parseInt(month); const group = document.createElement('div'); group.className = 'month-group'; const header = document.createElement('div'); header.className = `month-header month-${m}`; header.innerHTML = `<span class="emoji">${monthEmojis[m - 1]}</span> ${monthNames[m - 1]} (${groups[m].length})`; group.appendChild(header); groups[m].forEach(b => { const today = isToday(b.date); const card = document.createElement('div'); card.className = `birthday-card${today ? ' today' : ''}`; const nextDays = getNextBirthday(b.date); card.innerHTML = `<div class="birthday-info"><span class="birthday-name">${b.name} ${today ? '🎉' : ''}</span><span class="birthday-date"><span>${formatDate(b.date)}</span>${nextDays === 0 ? '<span>✨</span>' : `<span class="days-sep">–</span><span class="days-count" dir="rtl">${nextDays} يوم</span>`}</span></div><div class="birthday-actions"><button class="btn-edit" onclick="editBirthday('${b.id}')">✏️</button><button class="btn-delete" onclick="deleteBirthday('${b.id}')">🗑️</button></div>`; group.appendChild(card); }); listContainer.appendChild(group); }); }
