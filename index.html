@@ -30,9 +30,8 @@
     .tabs-container::-webkit-scrollbar { display: none; }
     .tab { padding: 0.6rem 1.2rem; border: none; border-radius: 12px; font-size: 0.9rem; font-family: 'Tajawal', sans-serif; font-weight: 600; cursor: pointer; white-space: nowrap; background: transparent; color: rgba(255,255,255,0.7); transition: all 0.3s ease; position: relative; display: flex; align-items: center; gap: 0.4rem; }
     .tab:hover { color: white; background: rgba(255,255,255,0.1); }
-    .tab.active { background: white; color: #667eea; box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
-    .tab .tab-count { font-size: 0.7rem; background: rgba(0,0,0,0.1); padding: 0.1rem 0.4rem; border-radius: 10px; }
-    .tab.active .tab-count { background: rgba(102,126,234,0.15); color: #667eea; }
+    .tab.active { box-shadow: 0 2px 10px rgba(0,0,0,0.15); }
+    .tab .tab-count { background: rgba(0,0,0,0.1); padding: 0.1rem 0.4rem; border-radius: 10px; font-size: 0.7rem; }
     .tab-add { padding: 0.6rem 1rem; border: 2px dashed rgba(255,255,255,0.3); border-radius: 12px; background: transparent; color: rgba(255,255,255,0.5); font-size: 1.2rem; cursor: pointer; transition: all 0.3s ease; flex-shrink: 0; }
     .tab-add:hover { border-color: rgba(255,255,255,0.6); color: white; background: rgba(255,255,255,0.1); }
     .tab-menu-btn { font-size: 0.8rem; cursor: pointer; padding: 2px 4px; border-radius: 6px; border: none; background: none; color: inherit; opacity: 0.4; transition: opacity 0.2s, background 0.2s; }
@@ -228,6 +227,7 @@
     const STORAGE_KEY = 'birthdays';
     const monthNames = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
     const monthEmojis = ['❄️','💝','🌸','🌷','☀️','🌻','🎆','🎈','🍂','🎃','🍁','🎄'];
+    const groupColors = ['#e74c3c','#e91e63','#9c27b0','#673ab7','#3f51b5','#2196f3','#00bcd4','#009688','#4caf50','#ff9800','#795548','#f44336','#8bc34a','#ff5722','#607d8b','#00897b'];
     const defaultData = [{"id":"d01","name":"أميرة","date":"30/01"},{"id":"d02","name":"ميخا","date":"07/02"},{"id":"d03","name":"إخلاص","date":"05/02"},{"id":"d04","name":"القس بطرس غريب","date":"13/03"},{"id":"d05","name":"ديانا","date":"01/04"},{"id":"d06","name":"مادلين","date":"05/04"},{"id":"d07","name":"حلوة","date":"07/04"},{"id":"d08","name":"آمنة","date":"05/05"},{"id":"d09","name":"إيفيت","date":"08/05"},{"id":"d10","name":"ميار","date":"25/05"},{"id":"d11","name":"فيفيان","date":"04/06"},{"id":"d12","name":"آمال خورية","date":"05/06"},{"id":"d13","name":"عرين نخلة","date":"20/07"},{"id":"d14","name":"أنغام","date":"25/07"},{"id":"d15","name":"ريمونة","date":"01/09"},{"id":"d16","name":"دانيال","date":"19/09"},{"id":"d17","name":"كريمة","date":"05/10"},{"id":"d18","name":"أسامة نخلة","date":"11/10"},{"id":"d19","name":"سهيلة","date":"17/10"},{"id":"d20","name":"جوزفين","date":"23/10"},{"id":"d21","name":"يسرى","date":"15/11"},{"id":"d22","name":"ميراي","date":"16/11"},{"id":"d23","name":"صموئيل","date":"20/11"},{"id":"d24","name":"القس حسام","date":"15/12"}];
     let appData = null;
     function generateId() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
@@ -253,6 +253,7 @@
       if (!appData.activeGroupId || !appData.groups.find(g => g.id === appData.activeGroupId)) {
         appData.activeGroupId = appData.groups[0].id;
       }
+      appData.groups.forEach((g, i) => { if (!g.color) g.color = groupColors[i % groupColors.length]; });
     }
     function getActiveGroup() { return appData.groups.find(g => g.id === appData.activeGroupId); }
     function getBirthdays() { const g = getActiveGroup(); return g ? g.birthdays : []; }
@@ -291,9 +292,12 @@
     function renderTabs() {
       tabsContainer.innerHTML = '';
       appData.groups.forEach(g => {
+        const color = g.color || groupColors[appData.groups.indexOf(g) % groupColors.length];
+        const isActive = g.id === appData.activeGroupId;
         const tab = document.createElement('button');
-        tab.className = `tab${g.id === appData.activeGroupId ? ' active' : ''}`;
-        tab.innerHTML = `<span>${g.name}</span><span class="tab-count">${g.birthdays.length}</span><span class="tab-menu-btn" onclick="event.stopPropagation();showTabMenu(event,'${g.id}')">⋮</span>`;
+        tab.className = `tab${isActive ? ' active' : ''}`;
+        if (isActive) { tab.style.background = color; tab.style.color = 'white'; } else { tab.style.background = color + '33'; tab.style.color = color; }
+        tab.innerHTML = `<span>${g.name}</span><span class="tab-count" style="${isActive ? 'background:rgba(255,255,255,0.25);color:white' : 'background:' + color + '22'}">${g.birthdays.length}</span><span class="tab-menu-btn" onclick="event.stopPropagation();showTabMenu(event,'${g.id}')" style="color:inherit">⋮</span>`;
         tab.addEventListener('click', () => switchGroup(g.id));
         tabsContainer.appendChild(tab);
       });
@@ -326,7 +330,8 @@
       const name = prompt('اسم المجموعة الجديدة:');
       if (!name || !name.trim()) return;
       const id = generateId();
-      appData.groups.push({ id, name: name.trim(), birthdays: [] });
+      const color = groupColors[appData.groups.length % groupColors.length];
+      appData.groups.push({ id, name: name.trim(), birthdays: [], color });
       appData.activeGroupId = id;
       save(); renderTabs(); renderList();
     }
