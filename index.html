@@ -538,13 +538,7 @@
         const data = JSON.parse(text);
         if (data.groups) {
           data.groups.forEach(ig => {
-            const existing = appData.groups.find(g => g.name.trim().toLowerCase() === ig.name.trim().toLowerCase());
-            if (existing) {
-              const seen = new Set(existing.birthdays.map(b => b.name.trim().toLowerCase() + '|' + normalizeDate(b.date)));
-              ig.birthdays.forEach(b => { const key = b.name.trim().toLowerCase() + '|' + normalizeDate(b.date); if (!seen.has(key)) { existing.birthdays.push(b); seen.add(key); } });
-            } else {
-              appData.groups.push({ id: generateId(), name: ig.name, birthdays: ig.birthdays, color: ig.color || groupColors[appData.groups.length % groupColors.length] });
-            }
+            appData.groups.push({ id: generateId(), name: ig.name, birthdays: ig.birthdays, color: ig.color || groupColors[appData.groups.length % groupColors.length] });
           });
         } else if (Array.isArray(data)) {
           appData.groups.push({ id: generateId(), name: 'مستورد', birthdays: data, color: groupColors[appData.groups.length % groupColors.length] });
@@ -553,7 +547,7 @@
         alert('تم الاستيراد بنجاح!');
       } catch { alert('لا توجد بيانات في الحافظة أو البيانات غير صالحة!'); }
     }
-    function importData(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const data = JSON.parse(e.target.result); if (data.groups) { data.groups.forEach(ig => { const existing = appData.groups.find(g => g.name.trim().toLowerCase() === ig.name.trim().toLowerCase()); if (existing) { const seen = new Set(existing.birthdays.map(b => b.name.trim().toLowerCase() + '|' + normalizeDate(b.date))); ig.birthdays.forEach(b => { const key = b.name.trim().toLowerCase() + '|' + normalizeDate(b.date); if (!seen.has(key)) { existing.birthdays.push(b); seen.add(key); } }); } else { const newId = generateId(); appData.groups.push({ id: newId, name: ig.name, birthdays: ig.birthdays, color: ig.color || groupColors[appData.groups.length % groupColors.length] }); } }); } else if (Array.isArray(data)) { const gid = generateId(); appData.groups.push({ id: gid, name: 'مستورد', birthdays: data, color: groupColors[appData.groups.length % groupColors.length] }); } else { alert('الملف غير صالح'); return; } save(); renderTabs(); if (calendarViewActive) renderCalendar(); else renderList(); alert('تم الاستيراد بنجاح!'); } catch { alert('خطأ في قراءة الملف'); } }; reader.readAsText(file); event.target.value = ''; }
+    function importData(event) { const file = event.target.files[0]; if (!file) return; const reader = new FileReader(); reader.onload = function(e) { try { const data = JSON.parse(e.target.result); if (data.groups) { data.groups.forEach(ig => { appData.groups.push({ id: generateId(), name: ig.name, birthdays: ig.birthdays, color: ig.color || groupColors[appData.groups.length % groupColors.length] }); }); } else if (Array.isArray(data)) { appData.groups.push({ id: generateId(), name: 'مستورد', birthdays: data, color: groupColors[appData.groups.length % groupColors.length] }); } else { alert('الملف غير صالح'); return; } save(); renderTabs(); if (calendarViewActive) renderCalendar(); else renderList(); alert('تم الاستيراد بنجاح!'); } catch { alert('خطأ في قراءة الملف'); } }; reader.readAsText(file); event.target.value = ''; }
     function getFilteredBirthdays() { const query = searchInput.value.trim().toLowerCase(); const filterMonth = parseInt(monthFilter.value); return getBirthdays().filter(b => { const matchesName = b.name.toLowerCase().includes(query); const { month } = parseDate(b.date); return matchesName && (filterMonth === 0 || month === filterMonth); }); }
     function updateStats() { const filtered = getFilteredBirthdays(); if (filtered.length === 0) { statsContainer.textContent = ''; return; } const todayCount = filtered.filter(b => isToday(b.date)).length; statsContainer.textContent = `إجمالي الأعياد: ${filtered.length}${todayCount > 0 ? ` | أعياد اليوم: ${todayCount}` : ''}`; }
     let selectedIds = new Set();
