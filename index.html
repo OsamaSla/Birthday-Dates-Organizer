@@ -724,7 +724,7 @@
     function updateAdvancedVisibility() {
       const totalBirthdays = appData.groups.reduce((sum, g) => sum + g.birthdays.length, 0);
       const hasData = totalBirthdays > 0;
-      const advancedEls = document.querySelectorAll('#calendarToggle, .btn-pdf, .btn-export, .btn-share, .btn-import, .btn-paste, .btn-delete-all');
+      const advancedEls = document.querySelectorAll('#calendarToggle, .btn-pdf, .btn-export, .btn-share, .btn-import, .btn-paste, .btn-delete-all, .search-box, .filter-box');
       advancedEls.forEach(el => { el.classList.toggle('hidden-advanced', !hasData); });
       const controls = document.querySelector('.controls');
       let hint = document.getElementById('hintText');
